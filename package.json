@@ -8,12 +8,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "startNode": "ts-node index.ts",
-    "dev": "nodemon --exec \"npm run startNode\" "
+    "dev": "nodemon -e ts --exec \"npm run startNode\" ",
+    "postinstall": "tsc && mv -i -v public build/ && rm -v -rf src"
+    
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/express": "^4.17.13",
+    "body-parser": "^1.20.0",
     "express": "^4.18.1",
     "nodemon": "^2.0.16",
     "ts-node": "^10.7.0",
