@@ -1,78 +1,49 @@
 import express from 'express';
+import User from '../Models/user';
 
-const dataBase = {
-    users: [
-        {
-            id: '123',
-            name: 'John',
-            email: 'john@gmail.com',
-            password: 'cookies',
-            entries: 0,
-            joined: new Date()
-        },
-        {
-            id: '124',
-            name: 'Raafat',
-            email: 'raafat@gmail.com',
-            password: 'cookies',
-            entries: 0,
-            joined: new Date()
-        },
-    ]
-};
-const register = (req: express.Request, res: express.Response) => {
+const register = async(req: express.Request, res: express.Response) => {
+    try{
     const { name, email, password } = req.body;
-    dataBase.users.push({
-        id: '125',
-        name:name,
-        email:email,
-        password:password,
-        entries:0,
-        joined: new Date()
-    });
-    res.json(dataBase.users[dataBase.users.length - 1]);
+    const newUser =await new User({name, email, password}).save();
+    res.json(newUser);
+    }catch(err){
+        res.status(400).json({message: err});
+    }
 }
-const login = (req: express.Request, res: express.Response) => {
+const login = async(req: express.Request, res: express.Response) => {
     const { email, password } = req.body;
-    if(email === dataBase.users[0].email && password === dataBase.users[0].password){
-        res.json(dataBase.users[0]);
+    const user =await User.findOne({email, password});
+    if(user){
+        res.json(user);
     }
     else{
         res.status(400).json('error logging in');
     }
 }
 
-const getAllUsers = (req: express.Request, res: express.Response) => {
-    res.json(dataBase.users);
+const getAllUsers = async(req: express.Request, res: express.Response) => {
+    const users = await User.find({});
+    res.json(users);
 }
 
-const getUser = (req: express.Request, res: express.Response) => {
+const getUser = async(req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    let found = false;
-    dataBase.users.forEach(user => {
-        if(user.id === id){
-            found = true;
-            res.json(user);
-        }
-    });
-    if(!found){
+    const user = await User.findById(id);
+    if(user){
+        res.json(user);
+    }
+    else{
         res.status(404).json('no user found');
     }
 }
 
-const numOfImages = (req: express.Request, res: express.Response) => {
+const numOfImages = async(req: express.Request, res: express.Response) => {
+    try{
     const {id} = req.body; 
-    let found = false;
-    console.log("helllo",id);
-    dataBase.users.forEach(user => {
-        if(user.id === id){
-            found = true;
-            user.entries++;
-            res.json(user.entries);
-        }
-    });
-    if(!found){
-        res.status(404).json('no user found');
+    const user =await User.findByIdAndUpdate(id, {$inc: {entries: 1}});
+    res.json(user);
+    }catch(err){
+        res.status(400).json({message: err});
     }
 }
 
